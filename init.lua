@@ -1,5 +1,9 @@
 -- ~/.config/nvim/init.lua
 
+-- 1. 首先设置 leader 键（这必须在所有快捷键配置之前）
+vim.g.mapleader = " "  -- 将 leader 键设置为空格键（这是最常用的设置）
+vim.g.maplocalleader = ","  -- 将 local leader 键设置为逗号（可选）
+
 -- 设置 Neovim 环境
 vim.opt.termguicolors = true  -- 启用 24 位颜色
 

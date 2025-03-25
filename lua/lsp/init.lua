@@ -3,6 +3,10 @@
 local lspconfig = require('lspconfig')
 local capabilities = require('cmp_nvim_lsp').default_capabilities()
 
+-- 1. 首先设置 leader 键（这必须在所有快捷键配置之前）
+vim.g.mapleader = " "  -- 将 leader 键设置为空格键（这是最常用的设置）
+vim.g.maplocalleader = ","  -- 将 local leader 键设置为逗号（可选）
+
 -- 基本的 LSP 配置
 local on_attach = function(client, bufnr)
     local opts = { noremap=true, silent=true, buffer=bufnr }
@@ -99,3 +103,39 @@ lspconfig.solargraph.setup{
         }
     }
 }
+
+-- 2. 文件导航相关快捷键配置
+-- 使用 vim.keymap.set 而不是旧的 vim.api.nvim_set_keymap
+-- 添加 desc 字段来提供快捷键说明
+
+-- 基础选项
+local opts = { noremap = true, silent = true }
+
+-- 文件导航
+-- 浏览最近文件
+vim.keymap.set('n', '<space>o', '<cmd>Telescope oldfiles<cr>', 
+  { noremap = true, silent = true, desc = 'Browse recent files' })
+
+-- 查找文件
+vim.keymap.set('n', '<space>ff', '<cmd>Telescope find_files<cr>', 
+  { noremap = true, silent = true, desc = 'Find files' })
+
+-- 搜索文件内容
+vim.keymap.set('n', '<space>fg', '<cmd>Telescope live_grep<cr>', 
+  { noremap = true, silent = true, desc = 'Live grep' })
+
+-- 查找缓冲区
+vim.keymap.set('n', '<space>fb', '<cmd>Telescope buffers<cr>', 
+  { noremap = true, silent = true, desc = 'Find buffers' })
+
+-- 查找帮助标签
+vim.keymap.set('n', '<space>fh', '<cmd>Telescope help_tags<cr>', 
+  { noremap = true, silent = true, desc = 'Help tags' })
+
+-- 如果你也想要 FZF 的快捷键（作为备选）
+vim.keymap.set('n', '<space>fz', '<cmd>FZF<cr>', 
+  { noremap = true, silent = true, desc = 'FZF finder' })
+
+-- 文件历史
+vim.keymap.set('n', '<space>h', '<cmd>History<cr>', 
+  { noremap = true, silent = true, desc = 'File history (FZF)' })
