@@ -72,7 +72,7 @@ cmp.setup({
 -- }
 
 -- TypeScript/JavaScript
-lspconfig.typescript.setup({
+lspconfig.tsserver.setup({
     on_attach = on_attach,
     capabilities = capabilities,
 })

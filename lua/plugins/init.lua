@@ -24,8 +24,9 @@ Plug 'nvim-lualine/lualine.nvim'
 Plug 'nvim-tree/nvim-web-devicons'
 Plug 'kyazdani42/nvim-tree.lua'
 Plug 'folke/tokyonight.nvim'
-Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
-Plug 'junegunn/fzf.vim'
+Plug 'nvim-lua/plenary.nvim'
+Plug 'nvim-telescope/telescope.nvim', { 'tag': '0.1.8' }
+" or                                , { 'branch': '0.1.x' }
 call plug#end()
 ]]
 
