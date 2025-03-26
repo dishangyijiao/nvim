@@ -24,6 +24,9 @@ require('ui')               -- 加载界面配置
 -- LSP 配置
 pcall(require, 'lsp')       -- 加载 LSP 配置
 
+-- 在 LSP 配置后加载 Git 配置
+pcall(require, 'git')       -- 加载 Git 配置
+
 -- 调试配置
 pcall(require, 'dap')       -- 加载调试配置
 
