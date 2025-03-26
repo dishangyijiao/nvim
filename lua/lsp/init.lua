@@ -108,34 +108,21 @@ lspconfig.solargraph.setup{
 -- 使用 vim.keymap.set 而不是旧的 vim.api.nvim_set_keymap
 -- 添加 desc 字段来提供快捷键说明
 
--- 基础选项
-local opts = { noremap = true, silent = true }
-
--- 文件导航
--- 浏览最近文件
-vim.keymap.set('n', '<space>o', '<cmd>Telescope oldfiles<cr>', 
-  { noremap = true, silent = true, desc = 'Browse recent files' })
-
--- 查找文件
-vim.keymap.set('n', '<space>ff', '<cmd>Telescope find_files<cr>', 
-  { noremap = true, silent = true, desc = 'Find files' })
-
--- 搜索文件内容
-vim.keymap.set('n', '<space>fg', '<cmd>Telescope live_grep<cr>', 
-  { noremap = true, silent = true, desc = 'Live grep' })
-
--- 查找缓冲区
-vim.keymap.set('n', '<space>fb', '<cmd>Telescope buffers<cr>', 
-  { noremap = true, silent = true, desc = 'Find buffers' })
-
--- 查找帮助标签
-vim.keymap.set('n', '<space>fh', '<cmd>Telescope help_tags<cr>', 
-  { noremap = true, silent = true, desc = 'Help tags' })
-
--- 如果你也想要 FZF 的快捷键（作为备选）
-vim.keymap.set('n', '<space>fz', '<cmd>FZF<cr>', 
-  { noremap = true, silent = true, desc = 'FZF finder' })
-
--- 文件历史
-vim.keymap.set('n', '<space>h', '<cmd>History<cr>', 
-  { noremap = true, silent = true, desc = 'File history (FZF)' })
+-- 配置 Telescope 快捷键（最佳实践）
+-- 使用 <cmd> 而不是 :，并且添加描述
+vim.keymap.set('n', '<C-p>', '<cmd>Telescope find_files<CR>', 
+  { noremap = true, silent = true, desc = "Find files" })
+vim.keymap.set('n', '<leader>ff', '<cmd>Telescope find_files<CR>', 
+  { noremap = true, silent = true, desc = "Find files" })
+vim.keymap.set('n', '<leader>fg', '<cmd>Telescope live_grep<CR>', 
+  { noremap = true, silent = true, desc = "Live grep (search in all files)" })
+vim.keymap.set('n', '<leader>fb', '<cmd>Telescope buffers<CR>', 
+  { noremap = true, silent = true, desc = "Find buffers" })
+vim.keymap.set('n', '<leader>fh', '<cmd>Telescope help_tags<CR>', 
+  { noremap = true, silent = true, desc = "Help tags" })
+vim.keymap.set('n', '<leader>fs', '<cmd>Telescope lsp_document_symbols<CR>', 
+  { noremap = true, silent = true, desc = "Document symbols" })
+vim.keymap.set('n', '<leader>fr', '<cmd>Telescope lsp_references<CR>', 
+  { noremap = true, silent = true, desc = "Find references" })
+vim.keymap.set('n', '<leader>fd', '<cmd>Telescope diagnostics<CR>', 
+  { noremap = true, silent = true, desc = "Document diagnostics" })
