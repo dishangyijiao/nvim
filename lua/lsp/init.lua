@@ -97,11 +97,22 @@ lspconfig.solargraph.setup{
         solargraph = {
             diagnostics = true,
             completion = true,
+            definitions = true,
+            references = true,
+            hover = true,
+            rename = true,
+            symbols = true,
             flags = {
                 debounce_text_changes = 150,
             }
         }
     }
+}
+
+-- Ruby
+lspconfig.ruby_lsp.setup {
+    on_attach = on_attach,
+    capabilities = capabilities
 }
 
 -- 2. 文件导航相关快捷键配置
@@ -126,3 +137,21 @@ vim.keymap.set('n', '<leader>fr', '<cmd>Telescope lsp_references<CR>',
   { noremap = true, silent = true, desc = "Find references" })
 vim.keymap.set('n', '<leader>fd', '<cmd>Telescope diagnostics<CR>', 
   { noremap = true, silent = true, desc = "Document diagnostics" })
+vim.keymap.set('n', '<leader>gd', '<cmd>Telescope lsp_definitions<CR>',
+  { noremap = true, silent = true, desc = "Go to definitions (Telescope)" })
+
+-- 使用 Rg 进行搜索（因为 LSP 跳转不工作）
+vim.keymap.set('n', '<leader>rg', function()
+  local word = vim.fn.expand('<cword>')
+  vim.cmd('Rg ' .. word)
+end, { noremap = true, silent = true, desc = "Rg search current word" })
+
+-- FZF 快捷键
+vim.keymap.set('n', '<leader>rl', ':Rg <C-R><C-W><CR>',
+  { noremap = true, desc = "Rg search word under cursor" })
+vim.keymap.set('n', '<leader>rf', ':Files<CR>',
+  { noremap = true, desc = "FZF files" })
+vim.keymap.set('n', '<leader>rb', ':Buffers<CR>',
+  { noremap = true, desc = "FZF buffers" })
+vim.keymap.set('n', '<leader>rh', ':History<CR>',
+  { noremap = true, desc = "FZF file history" })
