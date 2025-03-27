@@ -30,6 +30,7 @@ Plug 'nvim-lua/plenary.nvim'
 Plug 'nvim-telescope/telescope.nvim', { 'tag': '0.1.8' }
 " or                                , { 'branch': '0.1.x' }
 Plug 'lewis6991/gitsigns.nvim'
+Plug 'tomasiser/vim-code-dark'     " VS Code 风格的主题
 call plug#end()
 ]]
 
