@@ -66,7 +66,7 @@ cmp.setup({
 
 -- 配置语言服务器
 -- JavaScript/TypeScript
-lspconfig.tsserver.setup({
+lspconfig.ts_ls.setup({
     on_attach = on_attach,
     capabilities = capabilities,
     filetypes = { "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx" },
@@ -84,100 +84,126 @@ lspconfig.cssls.setup({
 })
 
 -- Ruby
-lspconfig.solargraph.setup{
-    on_attach = on_attach,
-    capabilities = capabilities,
-    cmd = { "rbenv", "exec", "solargraph", "stdio" },
-    root_dir = lspconfig.util.root_pattern(".git", ".ruby-version", "Gemfile"),
-    settings = {
-        solargraph = {
-            diagnostics = true,
-            completion = true,
-            definitions = true,
-            references = true,
-            hover = true,
-            rename = true,
-            symbols = true,
-            flags = {
-                debounce_text_changes = 150,
+local solargraph_available = vim.fn.executable('solargraph') == 1
+if solargraph_available then
+    lspconfig.solargraph.setup{
+        on_attach = on_attach,
+        capabilities = capabilities,
+        cmd = { "rbenv", "exec", "solargraph", "stdio" },
+        root_dir = lspconfig.util.root_pattern(".git", ".ruby-version", "Gemfile"),
+        settings = {
+            solargraph = {
+                diagnostics = true,
+                completion = true,
+                definitions = true,
+                references = true,
+                hover = true,
+                rename = true,
+                symbols = true,
+                flags = {
+                    debounce_text_changes = 150,
+                }
             }
         }
     }
-}
+end
 
 -- Python
-lspconfig.pyright.setup({
-    on_attach = on_attach,
-    capabilities = capabilities,
-    settings = {
-        python = {
-            analysis = {
-                autoSearchPaths = true,
-                diagnosticMode = "workspace",
-                useLibraryCodeForTypes = true
+local pyright_available = vim.fn.executable('pyright-langserver') == 1 or vim.fn.executable('pyright') == 1
+if pyright_available then
+    lspconfig.pyright.setup({
+        on_attach = on_attach,
+        capabilities = capabilities,
+        settings = {
+            python = {
+                analysis = {
+                    autoSearchPaths = true,
+                    diagnosticMode = "workspace",
+                    useLibraryCodeForTypes = true
+                }
             }
         }
-    }
-})
+    })
+end
 
 -- Go
-lspconfig.gopls.setup({
-    on_attach = on_attach,
-    capabilities = capabilities,
-    settings = {
-        gopls = {
-            analyses = {
-                unusedparams = true,
+local gopls_available = vim.fn.executable('gopls') == 1
+if gopls_available then
+    lspconfig.gopls.setup({
+        on_attach = on_attach,
+        capabilities = capabilities,
+        settings = {
+            gopls = {
+                analyses = {
+                    unusedparams = true,
+                },
+                staticcheck = true,
             },
-            staticcheck = true,
         },
-    },
-})
+    })
+end
 
 -- C/C++
-lspconfig.clangd.setup({
-    on_attach = on_attach,
-    capabilities = capabilities,
-    cmd = {
-        "clangd",
-        "--background-index",
-        "--suggest-missing-includes",
-        "--clang-tidy",
-        "--header-insertion=iwyu",
-    },
-})
+-- 检查 clangd 是否可用，避免在未安装时报错
+local clangd_available = vim.fn.executable('clangd') == 1
+if clangd_available then
+    lspconfig.clangd.setup({
+        on_attach = on_attach,
+        capabilities = capabilities,
+        cmd = {
+            "clangd",
+            "--background-index",
+            "--suggest-missing-includes",
+            "--clang-tidy",
+            "--header-insertion=iwyu",
+        },
+    })
+else
+    -- 如需使用 clangd，请通过 :MasonInstall clangd 命令安装
+    -- 或者在终端中手动安装 clangd
+    vim.notify("clangd 未安装，C/C++ 语言服务器不可用。请使用 :MasonInstall clangd 安装。", vim.log.levels.WARN)
+end
 
 -- Rust
-lspconfig.rust_analyzer.setup({
-    on_attach = on_attach,
-    capabilities = capabilities,
-    settings = {
-        ["rust-analyzer"] = {
-            assist = {
-                importGranularity = "module",
-                importPrefix = "self",
-            },
-            cargo = {
-                loadOutDirsFromCheck = true
-            },
-            procMacro = {
-                enable = true
-            },
+local rust_analyzer_available = vim.fn.executable('rust-analyzer') == 1
+if rust_analyzer_available then
+    lspconfig.rust_analyzer.setup({
+        on_attach = on_attach,
+        capabilities = capabilities,
+        settings = {
+            ["rust-analyzer"] = {
+                assist = {
+                    importGranularity = "module",
+                    importPrefix = "self",
+                },
+                cargo = {
+                    loadOutDirsFromCheck = true
+                },
+                procMacro = {
+                    enable = true
+                },
+            }
         }
-    }
-})
+    })
+end
 
 -- Java
-lspconfig.jdtls.setup({
-    on_attach = on_attach,
-    capabilities = capabilities,
-})
+local jdtls_available = vim.fn.executable('jdtls') == 1
+if jdtls_available then
+    lspconfig.jdtls.setup({
+        on_attach = on_attach,
+        capabilities = capabilities,
+    })
+end
 
 -- Terraform
-lspconfig.terraformls.setup({
-    on_attach = on_attach,
-    capabilities = capabilities,
-})
+local terraformls_available = vim.fn.executable('terraform-ls') == 1
+if terraformls_available then
+    lspconfig.terraformls.setup({
+        on_attach = on_attach,
+        capabilities = capabilities,
+    })
+end
 
 -- Kubernetes/YAML
 lspconfig.yamlls.setup({

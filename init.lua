@@ -34,4 +34,5 @@ require("lazy").setup("plugins")
 -- 加载核心模块
 pcall(require, 'lsp')
 pcall(require, 'git')
-pcall(require, 'dap')
+-- 不在这里加载调试模块，避免循环加载
+-- pcall(require, 'dap')

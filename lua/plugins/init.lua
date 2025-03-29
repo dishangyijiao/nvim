@@ -70,27 +70,26 @@ return {
     config = function()
       require("mason-lspconfig").setup({
         ensure_installed = {
-          -- 后端语言
-          "clangd", "pyright", "gopls", "rust_analyzer", "jdtls", "solargraph",
           -- 前端语言
-          "tsserver", "html", "cssls", "jsonls",
+          "ts_ls", "html", "cssls", "jsonls",
           -- DevOps 工具
-          "terraformls", "yamlls", "dockerls", "bashls"
+          "yamlls", "dockerls", "bashls"
         },
-        automatic_installation = true,
+        -- 注意: clangd 和其他 LSP 服务器已从自动安装列表中移除
+        -- 如需使用这些服务器, 请通过 :Mason 命令手动安装
+        -- 或使用 :MasonInstall clangd 来安装特定的服务器
+        automatic_installation = false, -- 改为 false 以避免自动尝试安装未列出的服务器
       })
     end,
   },
-  { 
-    "jay-babu/mason-nvim-dap.nvim",
-    dependencies = { "williamboman/mason.nvim" },
-    config = function()
-      require("mason-nvim-dap").setup({
-        ensure_installed = { "python", "delve", "codelldb", "node-debug2-adapter", "java-debug-adapter" },
-        automatic_installation = true,
-      })
-    end,
-  },
+  -- 暂时禁用 mason-nvim-dap 以避免错误
+  -- { 
+  --   "jay-babu/mason-nvim-dap.nvim",
+  --   dependencies = { "williamboman/mason.nvim", "mfussenegger/nvim-dap" },
+  --   config = function()
+  --     -- 空配置
+  --   end,
+  -- },
   
   -- 文件树
   {
