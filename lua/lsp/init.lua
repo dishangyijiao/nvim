@@ -1,11 +1,8 @@
 -- ~/.config/nvim/lua/lsp/init.lua
+-- 简化的 LSP 配置
 
 local lspconfig = require('lspconfig')
 local capabilities = require('cmp_nvim_lsp').default_capabilities()
-
--- 1. 首先设置 leader 键（这必须在所有快捷键配置之前）
-vim.g.mapleader = " "  -- 将 leader 键设置为空格键（这是最常用的设置）
-vim.g.maplocalleader = ","  -- 将 local leader 键设置为逗号（可选）
 
 -- 基本的 LSP 配置
 local on_attach = function(client, bufnr)
@@ -68,24 +65,23 @@ cmp.setup({
 })
 
 -- 配置语言服务器
--- 只启用已安装的语言服务器
--- Python (需要 pip install pyright)
--- lspconfig.pyright.setup{
---     on_attach = on_attach,
---     capabilities = capabilities,
--- }
+-- JavaScript/TypeScript
+lspconfig.tsserver.setup({
+    on_attach = on_attach,
+    capabilities = capabilities,
+    filetypes = { "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx" },
+})
 
--- TypeScript/JavaScript
-lspconfig.ts_ls.setup({
+-- HTML/CSS
+lspconfig.html.setup({
     on_attach = on_attach,
     capabilities = capabilities,
 })
 
--- Go (需要安装 gopls)
--- lspconfig.gopls.setup{
---     on_attach = on_attach,
---     capabilities = capabilities,
--- }
+lspconfig.cssls.setup({
+    on_attach = on_attach,
+    capabilities = capabilities,
+})
 
 -- Ruby
 lspconfig.solargraph.setup{
@@ -109,49 +105,110 @@ lspconfig.solargraph.setup{
     }
 }
 
--- Ruby
-lspconfig.ruby_lsp.setup {
+-- Python
+lspconfig.pyright.setup({
     on_attach = on_attach,
-    capabilities = capabilities
-}
+    capabilities = capabilities,
+    settings = {
+        python = {
+            analysis = {
+                autoSearchPaths = true,
+                diagnosticMode = "workspace",
+                useLibraryCodeForTypes = true
+            }
+        }
+    }
+})
 
--- 2. 文件导航相关快捷键配置
--- 使用 vim.keymap.set 而不是旧的 vim.api.nvim_set_keymap
--- 添加 desc 字段来提供快捷键说明
+-- Go
+lspconfig.gopls.setup({
+    on_attach = on_attach,
+    capabilities = capabilities,
+    settings = {
+        gopls = {
+            analyses = {
+                unusedparams = true,
+            },
+            staticcheck = true,
+        },
+    },
+})
 
--- 配置 Telescope 快捷键（最佳实践）
--- 使用 <cmd> 而不是 :，并且添加描述
-vim.keymap.set('n', '<C-p>', '<cmd>Telescope find_files<CR>', 
-  { noremap = true, silent = true, desc = "Find files" })
-vim.keymap.set('n', '<leader>ff', '<cmd>Telescope find_files<CR>', 
-  { noremap = true, silent = true, desc = "Find files" })
-vim.keymap.set('n', '<leader>fg', '<cmd>Telescope live_grep<CR>', 
-  { noremap = true, silent = true, desc = "Live grep (search in all files)" })
-vim.keymap.set('n', '<leader>fb', '<cmd>Telescope buffers<CR>', 
-  { noremap = true, silent = true, desc = "Find buffers" })
-vim.keymap.set('n', '<leader>fh', '<cmd>Telescope help_tags<CR>', 
-  { noremap = true, silent = true, desc = "Help tags" })
+-- C/C++
+lspconfig.clangd.setup({
+    on_attach = on_attach,
+    capabilities = capabilities,
+    cmd = {
+        "clangd",
+        "--background-index",
+        "--suggest-missing-includes",
+        "--clang-tidy",
+        "--header-insertion=iwyu",
+    },
+})
+
+-- Rust
+lspconfig.rust_analyzer.setup({
+    on_attach = on_attach,
+    capabilities = capabilities,
+    settings = {
+        ["rust-analyzer"] = {
+            assist = {
+                importGranularity = "module",
+                importPrefix = "self",
+            },
+            cargo = {
+                loadOutDirsFromCheck = true
+            },
+            procMacro = {
+                enable = true
+            },
+        }
+    }
+})
+
+-- Java
+lspconfig.jdtls.setup({
+    on_attach = on_attach,
+    capabilities = capabilities,
+})
+
+-- Terraform
+lspconfig.terraformls.setup({
+    on_attach = on_attach,
+    capabilities = capabilities,
+})
+
+-- Kubernetes/YAML
+lspconfig.yamlls.setup({
+    on_attach = on_attach,
+    capabilities = capabilities,
+    settings = {
+        yaml = {
+            schemas = {
+                ["https://raw.githubusercontent.com/instrumenta/kubernetes-json-schema/master/v1.18.0-standalone-strict/all.json"] = "/*.k8s.yaml",
+                ["https://raw.githubusercontent.com/docker/compose/master/compose/config/compose_spec.json"] = "/*docker-compose*.{yml,yaml}",
+                ["https://json.schemastore.org/github-workflow.json"] = "/.github/workflows/*",
+            },
+            format = { enabled = true },
+            validate = true,
+            completion = true,
+        },
+    },
+})
+
+-- Dockerfile
+lspconfig.dockerls.setup({
+    on_attach = on_attach,
+    capabilities = capabilities,
+})
+
+-- LSP相关的快捷键配置
 vim.keymap.set('n', '<leader>fs', '<cmd>Telescope lsp_document_symbols<CR>', 
-  { noremap = true, silent = true, desc = "Document symbols" })
+  { noremap = true, silent = true, desc = "文档符号搜索" })
 vim.keymap.set('n', '<leader>fr', '<cmd>Telescope lsp_references<CR>', 
-  { noremap = true, silent = true, desc = "Find references" })
+  { noremap = true, silent = true, desc = "查找引用" })
 vim.keymap.set('n', '<leader>fd', '<cmd>Telescope diagnostics<CR>', 
-  { noremap = true, silent = true, desc = "Document diagnostics" })
+  { noremap = true, silent = true, desc = "文档诊断信息" })
 vim.keymap.set('n', '<leader>gd', '<cmd>Telescope lsp_definitions<CR>',
-  { noremap = true, silent = true, desc = "Go to definitions (Telescope)" })
-
--- 使用 Rg 进行搜索（因为 LSP 跳转不工作）
-vim.keymap.set('n', '<leader>rg', function()
-  local word = vim.fn.expand('<cword>')
-  vim.cmd('Rg ' .. word)
-end, { noremap = true, silent = true, desc = "Rg search current word" })
-
--- FZF 快捷键
-vim.keymap.set('n', '<leader>rl', ':Rg <C-R><C-W><CR>',
-  { noremap = true, desc = "Rg search word under cursor" })
-vim.keymap.set('n', '<leader>rf', ':Files<CR>',
-  { noremap = true, desc = "FZF files" })
-vim.keymap.set('n', '<leader>rb', ':Buffers<CR>',
-  { noremap = true, desc = "FZF buffers" })
-vim.keymap.set('n', '<leader>rh', ':History<CR>',
-  { noremap = true, desc = "FZF file history" })
+  { noremap = true, silent = true, desc = "转到定义 (Telescope)" })
