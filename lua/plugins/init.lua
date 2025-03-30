@@ -98,6 +98,23 @@ return {
         view = { width = 30 },
         renderer = { group_empty = true },
         filters = { dotfiles = true },
+        on_attach = function(bufnr)
+          local api = require('nvim-tree.api')
+          
+          -- 自定义按键映射
+          local function opts(desc)
+            return { desc = 'nvim-tree: ' .. desc, buffer = bufnr, noremap = true, silent = true, nowait = true }
+          end
+          
+          -- 修复Enter键映射，确保它打开文件或目录
+          vim.keymap.set('n', '<CR>', api.node.open.edit, opts('Open'))
+          vim.keymap.set('n', 'o', api.node.open.edit, opts('Open'))
+          vim.keymap.set('n', '<2-LeftMouse>', api.node.open.edit, opts('Open'))
+          
+          -- 其他有用的键映射
+          vim.keymap.set('n', 'h', api.node.navigate.parent_close, opts('Close Directory'))
+          vim.keymap.set('n', 'l', api.node.open.edit, opts('Open'))
+        end,
       })
     end,
   },
