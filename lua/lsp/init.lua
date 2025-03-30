@@ -143,8 +143,12 @@ if gopls_available then
     })
 end
 
--- C/C++
--- 检查 clangd 是否可用，避免在未安装时报错
+-- C/C++ - 禁用警告提示
+-- 如果您将来需要使用 C/C++ 语言服务器，请取消注释以下代码
+-- 并运行 :MasonInstall clangd 安装所需服务器
+
+-- 禁用检查和配置，不再显示提示
+--[[
 local clangd_available = vim.fn.executable('clangd') == 1
 if clangd_available then
     lspconfig.clangd.setup({
@@ -158,11 +162,8 @@ if clangd_available then
             "--header-insertion=iwyu",
         },
     })
-else
-    -- 如需使用 clangd，请通过 :MasonInstall clangd 命令安装
-    -- 或者在终端中手动安装 clangd
-    vim.notify("clangd 未安装，C/C++ 语言服务器不可用。请使用 :MasonInstall clangd 安装。", vim.log.levels.WARN)
 end
+--]]
 
 -- Rust
 local rust_analyzer_available = vim.fn.executable('rust-analyzer') == 1
@@ -222,6 +223,32 @@ lspconfig.yamlls.setup({
         },
     },
 })
+
+-- JSON - 禁用警告提示
+-- 如果您将来需要使用 JSON 语言服务器，请取消注释以下代码
+-- 并运行 :MasonInstall jsonls 安装所需服务器
+
+-- 禁用检查和配置，不再显示提示
+--[[
+local jsonls_available = vim.fn.executable('vscode-json-language-server') == 1
+if jsonls_available then
+    lspconfig.jsonls.setup({
+        on_attach = on_attach,
+        capabilities = capabilities,
+        settings = {
+            json = {
+                schemas = {
+                    ["https://json.schemastore.org/package.json"] = "package.json",
+                    ["https://json.schemastore.org/tsconfig.json"] = "tsconfig.json",
+                    ["https://json.schemastore.org/eslintrc.json"] = ".eslintrc.json",
+                    ["https://json.schemastore.org/prettierrc.json"] = ".prettierrc.json",
+                },
+                validate = { enable = true },
+            },
+        },
+    })
+end
+--]]
 
 -- Dockerfile
 lspconfig.dockerls.setup({

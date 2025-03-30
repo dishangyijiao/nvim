@@ -69,16 +69,13 @@ return {
     "williamboman/mason-lspconfig.nvim",
     config = function()
       require("mason-lspconfig").setup({
-        ensure_installed = {
-          -- 前端语言
-          "ts_ls", "html", "cssls", "jsonls",
-          -- DevOps 工具
-          "yamlls", "dockerls", "bashls"
-        },
-        -- 注意: clangd 和其他 LSP 服务器已从自动安装列表中移除
-        -- 如需使用这些服务器, 请通过 :Mason 命令手动安装
-        -- 或使用 :MasonInstall clangd 来安装特定的服务器
-        automatic_installation = false, -- 改为 false 以避免自动尝试安装未列出的服务器
+        -- 禁用自动安装，根据日志显示 npm 安装失败
+        ensure_installed = { },
+        -- 注意: 所有服务器均需手动安装
+        -- 检查 npm 安装和网络连接后，可以通过以下命令安装：
+        -- :MasonInstall html-lsp css-lsp bash-language-server
+        -- :MasonInstall jsonls clangd gopls pyright rust-analyzer
+        automatic_installation = false, -- 禁用自动安装
       })
     end,
   },
