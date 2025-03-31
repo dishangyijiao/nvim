@@ -17,6 +17,26 @@ brew install --cask wezterm
 
 **下载链接**: [https://wezfurlong.org/wezterm/installation.html](https://wezfurlong.org/wezterm/installation.html)
 
+**WezTerm 配置安装**:
+
+本仓库包含了适配中文字体显示的 WezTerm 配置文件，位于 `wezterm.lua`。要安装这个配置，请执行以下命令：
+
+```bash
+# 运行安装脚本创建符号链接
+~/.config/nvim/setup_wezterm.sh
+```
+
+<details>
+<summary><b>WezTerm 配置亮点</b></summary>
+
+- **中文字体支持**: 配置了字体回退机制，确保中文字符在 tmux 和 Neovim 中正确显示
+- **字体配置**: 使用 JetBrains Mono 作为主字体，回退到 Heiti SC、PingFang SC 等中文字体
+- **终端兼容性**: 设置了 xterm-256color 终端类型，优化与 tmux 配合使用
+- **UTF-8 支持**: 启用了必要的编码设置，确保各种语言字符正确显示
+
+要修改配置，编辑 `~/.config/nvim/wezterm.lua` 文件即可，修改后重启 WezTerm 生效。
+</details>
+
 #### tmux
 
 tmux 是一个终端复用器，允许在单个终端窗口中运行多个终端会话。

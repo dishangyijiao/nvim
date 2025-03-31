@@ -14,6 +14,11 @@ vim.opt.shiftwidth = 2        -- 缩进宽度为2
 vim.opt.tabstop = 2           -- Tab宽度为2
 vim.opt.smartindent = true    -- 智能缩进
 
+-- 字符编码设置（解决中文显示问题）
+vim.opt.encoding = "utf-8"     -- 内部使用的编码
+vim.opt.fileencoding = "utf-8" -- 写入文件时使用的编码
+vim.opt.fencs = "utf-8,ucs-bom,shift-jis,gb18030,gbk,gb2312,cp936" -- 文件编码猜测顺序
+
 -- 安装 lazy.nvim 插件管理器
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
