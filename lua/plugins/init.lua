@@ -97,7 +97,7 @@ return {
         sort_by = "case_sensitive",
         view = { width = 30 },
         renderer = { group_empty = true },
-        filters = { dotfiles = true },
+        filters = { dotfiles = false },
         on_attach = function(bufnr)
           local api = require('nvim-tree.api')
           
