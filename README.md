@@ -95,7 +95,7 @@ Neovim 是 Vim 的现代化分支，特别适合架构设计和代码阅读。
 ```bash
 brew install neovim
 ```
-- 执行`cd ～/config/`，再执行 `git clone git@github.com:dishangyijiao/nvim.git`，用`nvim .`打开加载安全全部配置
+- 执行`cd ～/.config/`，再执行 `git clone git@github.com:dishangyijiao/nvim.git`，用`nvim .`打开加载安全全部配置
 
 **下载链接**: [https://neovim.io/](https://neovim.io/)
 
