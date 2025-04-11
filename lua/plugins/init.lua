@@ -114,8 +114,48 @@ return {
           -- 其他有用的键映射
           vim.keymap.set('n', 'h', api.node.navigate.parent_close, opts('Close Directory'))
           vim.keymap.set('n', 'l', api.node.open.edit, opts('Open'))
+          
+          -- 添加上下级目录导航快捷键
+          -- 进入子目录 (J键)
+          vim.keymap.set('n', 'J', function()
+            local node = api.tree.get_node_under_cursor()
+            if node.type == "directory" then
+              -- 直接进入子目录
+              api.node.open.edit(node)
+              -- 如果是关闭的目录，这会打开它
+              -- 如果已经打开，这会进入该目录
+              if node.open then
+                api.tree.change_root_to_node(node)
+              end
+            end
+          end, opts('进入子目录'))
+          
+          -- 返回父目录 (K键)
+          vim.keymap.set('n', 'K', function()
+            -- 切换到父目录
+            api.tree.change_root_to_parent()
+          end, opts('返回父目录'))
+          
+          -- 更多快捷导航
+          vim.keymap.set('n', 'H', api.tree.change_root_to_parent, opts('Up'))
+          vim.keymap.set('n', 'L', api.tree.change_root_to_node, opts('CD'))
+          
+          -- 其他实用快捷键
+          vim.keymap.set('n', 'R', api.tree.reload, opts('刷新'))
+          vim.keymap.set('n', 'a', api.fs.create, opts('创建'))
+          vim.keymap.set('n', 'd', api.fs.remove, opts('删除'))
+          vim.keymap.set('n', 'r', api.fs.rename, opts('重命名'))
+          vim.keymap.set('n', 'c', api.fs.copy.node, opts('复制'))
+          vim.keymap.set('n', 'p', api.fs.paste, opts('粘贴'))
+          vim.keymap.set('n', 'y', api.fs.copy.filename, opts('复制文件名'))
+          vim.keymap.set('n', 'Y', api.fs.copy.relative_path, opts('复制相对路径'))
+          vim.keymap.set('n', '?', api.tree.toggle_help, opts('帮助'))
         end,
       })
+      
+      -- 添加打开文件树的快捷键
+      vim.keymap.set('n', '<leader>e', ':NvimTreeToggle<CR>', { desc = '切换文件树', noremap = true, silent = true })
+      vim.keymap.set('n', '<leader>fe', ':NvimTreeFindFile<CR>', { desc = '在文件树中定位当前文件', noremap = true, silent = true })
     end,
   },
   
