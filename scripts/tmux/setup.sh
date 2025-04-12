@@ -64,6 +64,25 @@ setw -g mode-keys vi
 bind -T copy-mode-vi v send -X begin-selection
 bind -T copy-mode-vi y send -X copy-selection
 
+# 智能窗格切换与 Neovim 集成 (vim-tmux-navigator)
+is_vim="ps -o state= -o comm= -t '#{pane_tty}' \
+    | grep -iqE '^[^TXZ ]+ +(\\S+\\/)?g?(view|n?vim?x?)(diff)?$'"
+bind-key -n 'C-h' if-shell "$is_vim" 'send-keys C-h'  'select-pane -L'
+bind-key -n 'C-j' if-shell "$is_vim" 'send-keys C-j'  'select-pane -D'
+bind-key -n 'C-k' if-shell "$is_vim" 'send-keys C-k'  'select-pane -U'
+bind-key -n 'C-l' if-shell "$is_vim" 'send-keys C-l'  'select-pane -R'
+tmux_version='$(tmux -V | sed -En "s/^tmux ([0-9]+(.[0-9]+)?).*/\1/p")'
+if-shell -b '[ "$(echo "$tmux_version < 3.0" | bc)" = 1 ]' \
+    "bind-key -n 'C-\\' if-shell \"$is_vim\" 'send-keys C-\\'  'select-pane -l'"
+if-shell -b '[ "$(echo "$tmux_version >= 3.0" | bc)" = 1 ]' \
+    "bind-key -n 'C-\\' if-shell \"$is_vim\" 'send-keys C-\\\\'  'select-pane -l'"
+
+bind-key -T copy-mode-vi 'C-h' select-pane -L
+bind-key -T copy-mode-vi 'C-j' select-pane -D
+bind-key -T copy-mode-vi 'C-k' select-pane -U
+bind-key -T copy-mode-vi 'C-l' select-pane -R
+bind-key -T copy-mode-vi 'C-\' select-pane -l
+
 # 插件
 set -g @plugin 'tmux-plugins/tpm'
 set -g @plugin 'tmux-plugins/tmux-resurrect'
@@ -82,9 +101,18 @@ EOF
 # 安装插件
 ~/.tmux/plugins/tpm/bin/install_plugins
 
+# 确保插件权限正确
+chmod +x ~/.tmux/plugins/tpm/tpm
+chmod +x ~/.tmux/plugins/tpm/bin/*
+
+# 提示安装 Neovim 插件
+echo -e "${BLUE}请确保在 Neovim 中安装 vim-tmux-navigator 插件${NC}"
+echo "在 lua/plugins/init.lua 文件中应该已经添加了相关配置"
+
 echo -e "${GREEN}tmux 环境设置完成！${NC}"
 echo -e "${BLUE}提示：${NC}"
 echo "1. 使用 prefix + I 安装插件（如果需要）"
 echo "2. 使用 prefix + Ctrl-s 保存会话"
 echo "3. 使用 prefix + Ctrl-r 恢复会话"
-echo "4. 运行 ./tmux-dev.sh 来管理开发环境"
+echo "4. 使用 Ctrl-h/j/k/l 在 tmux 窗格和 Neovim 窗口之间无缝切换"
+echo "5. 运行 ./tmux-dev.sh 来管理开发环境"

@@ -5,6 +5,17 @@ return {
   -- 核心插件
   { "folke/lazy.nvim", tag = "stable" },
   
+  -- tmux 整合插件
+  {
+    "christoomey/vim-tmux-navigator",
+    lazy = false,
+    priority = 500,
+    config = function()
+      -- 重新绑定清屏快捷键，因为C-l被导航占用
+      vim.keymap.set('n', '<leader>l', ':nohlsearch<CR><C-L>', { silent = true, desc = '清除搜索高亮并刷新屏幕' })
+    end,
+  },
+  
   -- 语法高亮
   {
     "nvim-treesitter/nvim-treesitter",
