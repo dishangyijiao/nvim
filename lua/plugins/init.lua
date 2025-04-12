@@ -125,8 +125,48 @@ return {
           -- 其他有用的键映射
           vim.keymap.set('n', 'h', api.node.navigate.parent_close, opts('Close Directory'))
           vim.keymap.set('n', 'l', api.node.open.edit, opts('Open'))
+          
+          -- 添加上下级目录导航快捷键
+          -- 进入子目录 (J键)
+          vim.keymap.set('n', 'J', function()
+            local node = api.tree.get_node_under_cursor()
+            if node.type == "directory" then
+              -- 直接进入子目录
+              api.node.open.edit(node)
+              -- 如果是关闭的目录，这会打开它
+              -- 如果已经打开，这会进入该目录
+              if node.open then
+                api.tree.change_root_to_node(node)
+              end
+            end
+          end, opts('进入子目录'))
+          
+          -- 返回父目录 (K键)
+          vim.keymap.set('n', 'K', function()
+            -- 切换到父目录
+            api.tree.change_root_to_parent()
+          end, opts('返回父目录'))
+          
+          -- 更多快捷导航
+          vim.keymap.set('n', 'H', api.tree.change_root_to_parent, opts('Up'))
+          vim.keymap.set('n', 'L', api.tree.change_root_to_node, opts('CD'))
+          
+          -- 其他实用快捷键
+          vim.keymap.set('n', 'R', api.tree.reload, opts('刷新'))
+          vim.keymap.set('n', 'a', api.fs.create, opts('创建'))
+          vim.keymap.set('n', 'd', api.fs.remove, opts('删除'))
+          vim.keymap.set('n', 'r', api.fs.rename, opts('重命名'))
+          vim.keymap.set('n', 'c', api.fs.copy.node, opts('复制'))
+          vim.keymap.set('n', 'p', api.fs.paste, opts('粘贴'))
+          vim.keymap.set('n', 'y', api.fs.copy.filename, opts('复制文件名'))
+          vim.keymap.set('n', 'Y', api.fs.copy.relative_path, opts('复制相对路径'))
+          vim.keymap.set('n', '?', api.tree.toggle_help, opts('帮助'))
         end,
       })
+      
+      -- 添加打开文件树的快捷键
+      vim.keymap.set('n', '<leader>e', ':NvimTreeToggle<CR>', { desc = '切换文件树', noremap = true, silent = true })
+      vim.keymap.set('n', '<leader>fe', ':NvimTreeFindFile<CR>', { desc = '在文件树中定位当前文件', noremap = true, silent = true })
     end,
   },
   
@@ -196,6 +236,179 @@ return {
         autocmd FileType c,cpp highlight cppSTLconstant guifg=#4FC1FF
         augroup END
       ]])
+    end,
+  },
+  
+  -- Avante.nvim - 官方AI助手 (使用OpenAI/Claude等模型)
+  {
+    "yetone/avante.nvim",
+    event = "VeryLazy",
+    version = false, -- Never set this value to "*"! Never!
+    enabled = true,
+    opts = {
+      -- 简化配置，只使用 anthropic 提供商
+      provider = "anthropic",
+      -- API 配置
+      anthropic = {
+        api_key = "", -- 需要填入你的 API 密钥
+        model = "claude-3.5-sonnet",
+        endpoint = "https://api.deerapi.com", -- 代理地址
+      },
+    },
+    -- 简化构建过程
+    build = function()
+      if vim.fn.has("win32") == 1 then
+        vim.fn.system("powershell -ExecutionPolicy Bypass -File Build.ps1 -BuildFromSource false")
+      else
+        vim.fn.system("make BUILD_FROM_SOURCE=false")
+      end
+    end,
+    dependencies = {
+      "nvim-treesitter/nvim-treesitter",
+      "stevearc/dressing.nvim",
+      "nvim-lua/plenary.nvim",
+      "MunifTanjim/nui.nvim",
+      "nvim-telescope/telescope.nvim",
+      "nvim-tree/nvim-web-devicons",
+    },
+    config = function(_, opts)
+      -- 简单的错误处理
+      local ok, avante = pcall(require, "avante")
+      if not ok then
+        vim.notify("Avante 插件加载失败", vim.log.levels.WARN)
+        return
+      end
+      
+      -- 设置插件
+      avante.setup(opts)
+      
+      -- 简化快捷键
+      vim.keymap.set("n", "<leader>aa", function()
+        vim.cmd("Avante")
+      end, { desc = "打开 Avante" })
+      
+      vim.keymap.set("n", "<leader>ac", function()
+        vim.cmd("AvanteChat")
+      end, { desc = "打开 Avante 聊天" })
+      
+      vim.keymap.set("v", "<leader>a", function()
+        vim.cmd("AvanteSelection")
+      end, { desc = "将选中文本发送到 Avante" })
+    end,
+  },
+  
+  -- 备选 AI 助手插件 (如果 avante.nvim 无法安装，可以启用这个)
+  {
+    "jackMort/ChatGPT.nvim",
+    enabled = false, -- 默认禁用，如果 avante.nvim 无法安装，可以将此设为 true，并将 avante.nvim 设为 false
+    event = "VeryLazy",
+    dependencies = {
+      "MunifTanjim/nui.nvim",
+      "nvim-lua/plenary.nvim",
+      "nvim-telescope/telescope.nvim"
+    },
+    config = function()
+      require("chatgpt").setup({
+        api_key_cmd = nil,
+        yank_register = "+",
+        edit_with_instructions = {
+          diff = false,
+          keymaps = {
+            close = "<C-c>",
+            accept = "<C-y>",
+            toggle_diff = "<C-d>",
+            toggle_settings = "<C-o>",
+            cycle_windows = "<Tab>",
+            use_output_as_input = "<C-i>",
+          },
+        },
+        chat = {
+          welcome_message = "欢迎使用 ChatGPT! 有什么我可以帮助你的吗?",
+          loading_text = "加载中...",
+          question_sign = "🙂",
+          answer_sign = "🤖",
+          max_line_length = 120,
+          keymaps = {
+            close = { "<C-c>" },
+            yank_last = "<C-y>",
+            yank_last_code = "<C-k>",
+            scroll_up = "<C-u>",
+            scroll_down = "<C-d>",
+            new_session = "<C-n>",
+            cycle_windows = "<Tab>",
+            cycle_modes = "<C-f>",
+            select_session = "<Space>",
+            rename_session = "r",
+            delete_session = "d",
+            draft_message = "<C-d>",
+            toggle_settings = "<C-o>",
+            toggle_message_role = "<C-r>",
+            toggle_system_role_open = "<C-s>",
+            stop_generating = "<C-x>",
+          },
+        },
+        popup_input = {
+          prompt = "  ",
+          border = {
+            highlight = "FloatBorder",
+            style = "rounded",
+            text = {
+              top_align = "center",
+              top = " 提示 ",
+            },
+          },
+          win_options = {
+            winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+          },
+          submit = "<C-Enter>",
+          submit_n = "<Enter>",
+          max_visible_lines = 20
+        },
+        system_window = {
+          border = {
+            highlight = "FloatBorder",
+            style = "rounded",
+            text = {
+              top_align = "center",
+              top = " SYSTEM ",
+            },
+          },
+          win_options = {
+            winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+          },
+        },
+        popup_window = {
+          border = {
+            highlight = "FloatBorder",
+            style = "rounded",
+            text = {
+              top_align = "center",
+              top = " ChatGPT ",
+            },
+          },
+          win_options = {
+            winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+          },
+        },
+        session_window = {
+          border = {
+            highlight = "FloatBorder",
+            style = "rounded",
+            text = {
+              top_align = "center",
+              top = " 会话 ",
+            },
+          },
+          win_options = {
+            winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+          },
+        },
+      })
+      
+      -- 设置快捷键
+      vim.keymap.set("n", "<leader>gc", "<cmd>ChatGPT<CR>", { desc = "打开 ChatGPT" })
+      vim.keymap.set("v", "<leader>g", "<cmd>ChatGPTRun<CR>", { desc = "使用 ChatGPT 处理选中内容" })
+      vim.keymap.set("n", "<leader>ge", "<cmd>ChatGPTEditWithInstructions<CR>", { desc = "使用 ChatGPT 编辑" })
     end,
   },
 }
