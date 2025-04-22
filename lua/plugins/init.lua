@@ -1,6 +1,36 @@
 -- ~/.config/nvim/lua/plugins/init.lua
 -- 简化的插件配置 (使用 Lazy.nvim)
 
+-- 添加重新加载配置的快捷键
+vim.keymap.set('n', '<leader>rc', function()
+  -- 清除并重新加载所有配置
+  for name, _ in pairs(package.loaded) do
+    if name:match('^lsp') or name:match('^plugins') or name:match('^ui') then
+      package.loaded[name] = nil
+    end
+  end
+  
+  -- 重新加载 init.lua
+  dofile(vim.fn.stdpath('config') .. '/init.lua')
+  
+  -- 通知用户
+  vim.notify('Neovim 配置已重新加载', vim.log.levels.INFO)
+end, { desc = '重新加载 Neovim 配置' })
+
+-- 确保 Ruby 文件类型被正确识别
+vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+  pattern = { "*.rb", "*.rake", "Rakefile", "Gemfile", "*.gemspec", "*.ru" },
+  callback = function()
+    vim.bo.filetype = "ruby"
+  end,
+})
+
+-- 添加手动触发 LSP 重新加载的快捷键
+vim.keymap.set('n', '<leader>lr', function()
+  vim.cmd("LspRestart")
+  vim.notify('LSP 服务已重新启动', vim.log.levels.INFO)
+end, { desc = '重启 LSP 服务器' })
+
 return {
   -- 核心插件
   { "folke/lazy.nvim", tag = "stable" },
@@ -204,12 +234,100 @@ return {
       local telescope = require("telescope")
       local keymap = vim.keymap.set
       
-      telescope.setup()
+      -- 加载扩展
+      telescope.setup({
+        defaults = {
+          layout_strategy = "horizontal",
+          layout_config = {
+            width = 0.9,
+            height = 0.8,
+          },
+        },
+        extensions = {
+          -- 扩展配置
+        },
+      })
       
+      -- 基础文件搜索
       keymap("n", "<leader>ff", "<cmd>Telescope find_files<CR>", { desc = "查找文件" })
-      keymap("n", "<C-p>", "<cmd>Telescope find_files<CR>", { desc = "查找文件 (Ctrl+P)" })
+      keymap("n", "<leader>fp", "<cmd>Telescope find_files<CR>", { desc = "查找文件 (Ctrl+P)" })
       keymap("n", "<leader>fg", "<cmd>Telescope live_grep<CR>", { desc = "全局搜索" })
       keymap("n", "<leader>fb", "<cmd>Telescope buffers<CR>", { desc = "查找缓冲区" })
+      
+      -- 添加文件内容搜索快捷键（不依赖 LSP）
+      keymap("n", "<leader>fw", function()
+        -- 获取光标下的单词
+        local word = vim.fn.expand("<cword>")
+        -- 使用 Telescope grep_string 进行搜索
+        require('telescope.builtin').grep_string({ search = word })
+      end, { desc = "搜索光标下的单词" })
+      
+      -- 添加 Ruby 特定的方法搜索
+      keymap("n", "<leader>fm", function()
+        -- 获取光标下的单词
+        local word = vim.fn.expand("<cword>")
+        -- 针对 Ruby 方法定义模式进行搜索
+        require('telescope.builtin').grep_string({ 
+          search = "def\\s+" .. word, 
+          use_regex = true 
+        })
+      end, { desc = "查找 Ruby 方法定义" })
+      
+      keymap("n", "<leader>fu", function()
+        -- 获取光标下的单词
+        local word = vim.fn.expand("<cword>")
+        -- 搜索方法调用（不带 def 关键字的使用）
+        require('telescope.builtin').grep_string({ 
+          search = word, 
+          grep_open_files = false,
+          path_display = { "smart" },
+        })
+      end, { desc = "查找 Ruby 方法使用" })
+      
+      -- 添加可视模式下的全局搜索
+      keymap("v", "<leader>fs", function()
+        -- 获取可视模式下选中的文本
+        vim.cmd('noau normal! "vy"')
+        local text = vim.fn.getreg('v')
+        -- 清理文本
+        text = string.gsub(text, "\n", "")
+        
+        -- 搜索选中的文本
+        require('telescope.builtin').grep_string({ 
+          search = text,
+          word_match = "-w",
+          only_sort_text = true,
+          grep_open_files = false,
+          path_display = { "smart" },
+        })
+        
+        -- 重置寄存器
+        vim.fn.setreg('v', {})
+      end, { desc = "全局搜索选中文本" })
+      
+      -- 添加手动输入搜索
+      keymap("n", "<leader>fh", function()
+        vim.ui.input(
+          { prompt = "搜索整个项目: " },
+          function(input)
+            if input then
+              require('telescope.builtin').grep_string({ 
+                search = input,
+                only_sort_text = true,
+                grep_open_files = false,
+                path_display = { "smart" },
+              })
+            end
+          end
+        )
+      end, { desc = "手动输入搜索文本" })
+      
+      -- 添加符号搜索快捷键
+      keymap("n", "<leader>fr", "<cmd>Telescope lsp_references<CR>", { desc = "查找引用" })
+      keymap("n", "<leader>fd", "<cmd>Telescope lsp_definitions<CR>", { desc = "查找定义" })
+      keymap("n", "<leader>fi", "<cmd>Telescope lsp_implementations<CR>", { desc = "查找实现" })
+      keymap("n", "<leader>fs", "<cmd>Telescope lsp_document_symbols<CR>", { desc = "查找文档符号" })
+      keymap("n", "<leader>ft", "<cmd>Telescope lsp_type_definitions<CR>", { desc = "查找类型定义" })
     end,
   },
   

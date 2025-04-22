@@ -89,8 +89,8 @@ if solargraph_available then
     lspconfig.solargraph.setup{
         on_attach = on_attach,
         capabilities = capabilities,
-        cmd = { "rbenv", "exec", "solargraph", "stdio" },
-        root_dir = lspconfig.util.root_pattern(".git", ".ruby-version", "Gemfile"),
+        cmd = { "solargraph", "stdio" }, -- 默认命令，如果使用 rbenv 可以改回原来的配置
+        root_dir = lspconfig.util.root_pattern("Gemfile", ".git", ".ruby-version"),
         settings = {
             solargraph = {
                 diagnostics = true,
@@ -106,6 +106,55 @@ if solargraph_available then
             }
         }
     }
+end
+
+-- Ruby LSP - 新的官方 Ruby LSP
+local ruby_lsp_available = vim.fn.executable('ruby-lsp') == 1
+if ruby_lsp_available then
+    lspconfig.ruby_lsp.setup({
+        on_attach = function(client, bufnr)
+            on_attach(client, bufnr)
+            -- 添加额外的 Rails 项目相关快捷键
+            local opts = { noremap=true, silent=true, buffer=bufnr }
+            vim.keymap.set('n', '<leader>rf', '<cmd>Telescope lsp_references<CR>', opts)
+            vim.keymap.set('n', '<leader>ri', '<cmd>Telescope lsp_implementations<CR>', opts)
+        end,
+        capabilities = capabilities,
+        -- 确保识别所有 Ruby 文件类型
+        filetypes = {"ruby", "eruby", "rakefile", "rb", "rake", "gemfile"},
+        -- 更智能的项目根目录判断
+        root_dir = function(fname)
+            return lspconfig.util.root_pattern("Gemfile", ".git", ".ruby-version", "Rakefile")(fname) or
+                   lspconfig.util.find_git_ancestor(fname) or
+                   vim.fn.getcwd()
+        end,
+        -- Rails 项目特定的设置
+        settings = {
+            ruby_lsp = {
+                enabledFeatures = {
+                    "documentHighlights",
+                    "documentSymbols",
+                    "foldingRanges",
+                    "selectionRanges",
+                    "semanticHighlighting",
+                    "formatting",
+                    "diagnostics",
+                },
+                formatter = {
+                    rubocop = {
+                        command = "bundle",
+                        args = { "exec", "rubocop", "--autocorrect" }
+                    }
+                },
+                diagnostics = { 
+                    rubocop = {
+                        command = "bundle",
+                        args = { "exec", "rubocop" }
+                    }
+                }
+            }
+        }
+    })
 end
 
 -- Python
