@@ -51,6 +51,7 @@ cp ~/.config/nvim/tmux.conf ~/.tmux.conf
 - 窗格导航: `Ctrl+a h/j/k/l`
 - 创建窗口: `Ctrl+a c`
 - 分离会话: `Ctrl+a d`
+- 从当前窗格选择并打开链接: `Ctrl+a u`，再用 fzf 搜索并回车打开
 
 ## 终端配置
 
